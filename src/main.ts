@@ -117,8 +117,8 @@ panel.addEventListener("pointerdown", () => {
       event.preventDefault();
     }
 
-    panelHandle.style.setProperty("left", handlePosition.x + "px");
-    panelHandle.style.setProperty("top", handlePosition.y + "px");
+    panelHandle.style.setProperty("left", handlePosition.x / rect.width * 100 + "%");
+    panelHandle.style.setProperty("top", handlePosition.y / rect.height * 100 + "%");
 
     pickColor();
   };
