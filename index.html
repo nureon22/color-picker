@@ -7,7 +7,20 @@
     <title>Vite + TS</title>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <div class="container">
+        <div class="panel-container">
+          <div class="preview">
+            <span class="color-value"></span>
+          </div>
+          <div class="panel">
+            <canvas class="panel-canvas" width="400" height="200"></canvas>
+            <div class="panel-handle"></div>
+          </div>
+        </div>
+        <input type="range" class="hue-input" />
+      </div>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
