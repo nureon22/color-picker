@@ -68,8 +68,6 @@ body {
 .hue-input {
   --thumb-color: red;
 
-  -webkit-appearance: none;
-  -moz-appearance: none;
   appearance: none;
   position: relative;
   height: 28px;
