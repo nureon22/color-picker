@@ -66,20 +66,22 @@ const $$ = (selector: string) => [...document.querySelectorAll(selector)];
 
 // ----------
 
-const panelCanvas = $(".panel-canvas") as HTMLCanvasElement;
-const panelHandle = $(".panel-handle") as HTMLElement;
-const panel = $(".panel") as HTMLElement;
-const preview = $(".preview") as HTMLElement;
-const hueInput = $("input.hue-input") as HTMLInputElement;
-const hexOutput = $(".output--hex input.output-text") as HTMLInputElement;
-const cymkOutput = $(".output--cmyk input.output-text") as HTMLInputElement;
-const rgbOutput = $(".output--rgb input.output-text") as HTMLInputElement;
-const hsvOutput = $(".output--hsv input.output-text") as HTMLInputElement;
-const hslOutput = $(".output--hsl input.output-text") as HTMLInputElement;
-const allOutputTexts = $$("input.output-text") as HTMLInputElement[];
-const copyBtn = $(".copy-btn") as HTMLElement;
+const elements = {
+  panelCanvas: $(".panel-canvas") as HTMLCanvasElement,
+  panelHandle: $(".panel-handle") as HTMLElement,
+  panel: $(".panel") as HTMLElement,
+  preview: $(".preview") as HTMLElement,
+  hueInput: $("input.hue-input") as HTMLInputElement,
+  hexOutput: $(".output--hex input.output-text") as HTMLInputElement,
+  cymkOutput: $(".output--cmyk input.output-text") as HTMLInputElement,
+  rgbOutput: $(".output--rgb input.output-text") as HTMLInputElement,
+  hsvOutput: $(".output--hsv input.output-text") as HTMLInputElement,
+  hslOutput: $(".output--hsl input.output-text") as HTMLInputElement,
+  allOutputTexts: $$("input.output-text") as HTMLInputElement[],
+  copyBtn: $(".copy-btn") as HTMLElement,
+}
 
-let previousHue: number = clampNumber(0, +hueInput.value, 360);
+let previousHue: number = clampNumber(0, +elements.hueInput.value, 360);
 let currentHue: number = previousHue;
 
 let handlePosition = { x: 0, y: 0 };
@@ -87,14 +89,14 @@ let handlePosition = { x: 0, y: 0 };
 let isHueFirstInput = true;
 let hueInputTimeoutId: number | undefined;
 
-hueInput.addEventListener("input", () => {
-  currentHue = clampNumber(0, +hueInput.value, 360);
+elements.hueInput.addEventListener("input", () => {
+  currentHue = clampNumber(0, +elements.hueInput.value, 360);
 
   if (isHueFirstInput) {
     const stop = onEveryAnimationFrame(() => {
       if (previousHue !== currentHue) {
         previousHue = currentHue;
-        updatePanelCanvas(panelCanvas, currentHue);
+        updatePanelCanvas(elements.panelCanvas, currentHue);
         pickColor();
       }
     });
@@ -111,8 +113,8 @@ hueInput.addEventListener("input", () => {
   updateHueInputThumbColor();
 });
 
-panel.addEventListener("pointerdown", () => {
-  const rect = panel.getBoundingClientRect();
+elements.panel.addEventListener("pointerdown", () => {
+  const rect = elements.panel.getBoundingClientRect();
 
   const onMouseMove = (event: MouseEvent | TouchEvent) => {
     if (event instanceof MouseEvent) {
@@ -126,8 +128,8 @@ panel.addEventListener("pointerdown", () => {
       event.preventDefault();
     }
 
-    panelHandle.style.setProperty("left", handlePosition.x / rect.width * 100 + "%");
-    panelHandle.style.setProperty("top", handlePosition.y / rect.height * 100 + "%");
+    elements.panelHandle.style.setProperty("left", handlePosition.x / rect.width * 100 + "%");
+    elements.panelHandle.style.setProperty("top", handlePosition.y / rect.height * 100 + "%");
 
     pickColor();
   };
@@ -143,14 +145,14 @@ panel.addEventListener("pointerdown", () => {
 });
 
 function updateHueInputThumbColor() {
-  hueInput.style.setProperty(
+  elements.hueInput.style.setProperty(
     "--thumb-color",
     `hsl(${currentHue}deg, 100%, 50%)`
   );
 }
 
 function pickColor() {
-  const panelRect = panel.getBoundingClientRect();
+  const panelRect = elements.panel.getBoundingClientRect();
 
   const x = handlePosition.x / panelRect.width;
   const y = handlePosition.y / panelRect.height;
@@ -164,29 +166,29 @@ function pickColor() {
 }
 
 function outputColor(rgb: RGB) {
-  preview.style.setProperty("background-color", `rgb(${rgb})`);
+  elements.preview.style.setProperty("background-color", `rgb(${rgb})`);
 
   const cmyk = colorConvert.rgb.cmyk(rgb);
   const hsl = colorConvert.rgb.hsl(rgb);
   const hsv = colorConvert.rgb.hsv(rgb);
   const hex = colorConvert.rgb.hex(rgb);
 
-  hexOutput.value = `${hex}`;
-  cymkOutput.value = `${cmyk.join("%, ")}`;
-  rgbOutput.value = `${rgb.join(", ")}`;
-  hsvOutput.value = `${hsv[0]}deg, ${hsv[1]}%, ${hsv[2]}%`;
-  hslOutput.value = `${hsl[0]}deg, ${hsl[1]}%, ${hsl[2]}%`;
+  elements.hexOutput.value = `${hex}`;
+  elements.cymkOutput.value = `${cmyk.join("%, ")}`;
+  elements.rgbOutput.value = `${rgb.join(", ")}`;
+  elements.hsvOutput.value = `${hsv[0]}deg, ${hsv[1]}%, ${hsv[2]}%`;
+  elements.hslOutput.value = `${hsl[0]}deg, ${hsl[1]}%, ${hsl[2]}%`;
 }
 
-copyBtn.addEventListener("click", () => {
+elements.copyBtn.addEventListener("click", () => {
   try {
-    navigator.clipboard.writeText(`#${hexOutput.value}`);
+    navigator.clipboard.writeText(`#${elements.hexOutput.value}`);
   } catch {
     alert("Your browser doesn't support clipboard.");
   }
 });
 
-allOutputTexts.forEach((outputText) => {
+elements.allOutputTexts.forEach((outputText) => {
   outputText.addEventListener("click", () => {
     window.setTimeout(() => {
       const selection = window.getSelection();
@@ -204,6 +206,6 @@ allOutputTexts.forEach((outputText) => {
   });
 });
 
-updatePanelCanvas(panelCanvas, currentHue);
+updatePanelCanvas(elements.panelCanvas, currentHue);
 pickColor();
 updateHueInputThumbColor();
