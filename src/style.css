@@ -1,13 +1,18 @@
 *,
-*::before,
+*::after,
 *::after {
   box-sizing: border-box;
 }
 
+:root {
+  --page-background: #161618;
+  --page-foreground: #e0e0e0;
+}
+
 body {
   font-family: sans-serif;
-  background-color: #161618;
-  color: #e0e0e0;
+  background-color: var(--page-background);
+  color: var(--page-foreground);
 }
 
 .title {
@@ -144,6 +149,103 @@ body {
   outline: 2px solid white;
   outline-offset: -2px;
   appearance: none;
+}
+
+.outputs {
+  display: flex;
+  flex-direction: column;
+  row-gap: 12px;
+  margin-top: 20px;
+}
+
+.sub-outputs {
+  display: flex;
+  column-gap: 8px;
+}
+
+.output {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 48px;
+  padding: 0px 8px 0px 12px;
+  border: 1px solid hsl(0deg, 0%, 50%, 0.4);
+  border-radius: 4px;
+  width: 50%;
+  font-size: 13px;
+  position: relative;
+  color: hsl(0deg, 0%, 80%);
+}
+
+.output-text {
+  background-color: hsl(0deg, 0%, 50%, 0.12);
+  color: currentColor;
+  border: none;
+  padding: 0px 2px;
+  width: 100%;
+  font-size: 13px;
+  font-family: inherit;
+  height: 24px;
+}
+
+.output::after {
+  position: absolute;
+  left: 12px;
+  top: 0px;
+  padding: 0px 4px;
+  transform: translate(0%, -50%);
+  background-color: var(--page-background);
+}
+
+.outputs > .output--hex {
+  width: 100%;
+}
+
+.output--hex::after {
+  content: "hex";
+}
+
+.output--cmyk::after {
+  content: "cmyk";
+}
+
+.output--rgb::after {
+  content: "rgb";
+}
+
+.output--hsv::after {
+  content: "hsv";
+}
+
+.output--hsl::after {
+  content: "hsl";
+}
+
+.copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: transparent;
+  border-radius: 50%;
+  border: none;
+  color: currentColor;
+  cursor: pointer;
+}
+
+.copy-btn:hover {
+  background-color: hsla(0deg, 0%, 100%, 0.08);
+}
+
+.copy-btn:active {
+  background-color: hsla(0deg, 0%, 100%, 0.16);
+}
+
+.copy-btn svg {
+  width: 20px;
+  height: 20px;
 }
 
 @media (max-width: 600px) {

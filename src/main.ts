@@ -1,5 +1,6 @@
 import colorConvert from "color-convert";
 import "./style.css";
+import { RGB } from "color-convert/conversions";
 
 // # Predefined functions
 // ----------
@@ -61,6 +62,7 @@ function onEveryAnimationFrame(callback: FrameRequestCallback) {
 }
 
 const $ = (selector: string) => document.querySelector(selector);
+const $$ = (selector: string) => [...document.querySelectorAll(selector)];
 
 // ----------
 
@@ -69,6 +71,13 @@ const panelHandle = $(".panel-handle") as HTMLElement;
 const panel = $(".panel") as HTMLElement;
 const preview = $(".preview") as HTMLElement;
 const hueInput = $("input.hue-input") as HTMLInputElement;
+const hexOutput = $(".output--hex input.output-text") as HTMLInputElement;
+const cymkOutput = $(".output--cmyk input.output-text") as HTMLInputElement;
+const rgbOutput = $(".output--rgb input.output-text") as HTMLInputElement;
+const hsvOutput = $(".output--hsv input.output-text") as HTMLInputElement;
+const hslOutput = $(".output--hsl input.output-text") as HTMLInputElement;
+const allOutputTexts = $$("input.output-text") as HTMLInputElement[];
+const copyBtn = $(".copy-btn") as HTMLElement;
 
 let previousHue: number = clampNumber(0, +hueInput.value, 360);
 let currentHue: number = previousHue;
@@ -151,11 +160,49 @@ function pickColor() {
 
   const rgb = colorConvert.hsv.rgb([currentHue, saturation, value]);
 
-  const pickedColor = `rgb(${rgb})`;
-
-  preview.style.setProperty("background-color", pickedColor);
-  // colorValue.textContent = pickedColor;
+  outputColor(rgb);
 }
+
+function outputColor(rgb: RGB) {
+  preview.style.setProperty("background-color", `rgb(${rgb})`);
+
+  const cmyk = colorConvert.rgb.cmyk(rgb);
+  const hsl = colorConvert.rgb.hsl(rgb);
+  const hsv = colorConvert.rgb.hsv(rgb);
+  const hex = colorConvert.rgb.hex(rgb);
+
+  hexOutput.value = `${hex}`;
+  cymkOutput.value = `${cmyk.join("%, ")}`;
+  rgbOutput.value = `${rgb.join(", ")}`;
+  hsvOutput.value = `${hsv[0]}deg, ${hsv[1]}%, ${hsv[2]}%`;
+  hslOutput.value = `${hsl[0]}deg, ${hsl[1]}%, ${hsl[2]}%`;
+}
+
+copyBtn.addEventListener("click", () => {
+  try {
+    navigator.clipboard.writeText(`#${hexOutput.value}`);
+  } catch {
+    alert("Your browser doesn't support clipboard.");
+  }
+});
+
+allOutputTexts.forEach((outputText) => {
+  outputText.addEventListener("click", () => {
+    window.setTimeout(() => {
+      const selection = window.getSelection();
+
+      if (!selection) {
+        return;
+      }
+
+      const range = document.createRange();
+      range.selectNode(outputText);
+
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }, 0);
+  });
+});
 
 updatePanelCanvas(panelCanvas, currentHue);
 pickColor();
