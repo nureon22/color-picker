@@ -113,7 +113,7 @@ elements.hueInput.addEventListener("input", () => {
   updateHueInputThumbColor();
 });
 
-elements.panel.addEventListener("pointerdown", () => {
+elements.panel.addEventListener("pointerdown", (event) => {
   const rect = elements.panel.getBoundingClientRect();
 
   const onMouseMove = (event: MouseEvent | TouchEvent) => {
@@ -142,6 +142,8 @@ elements.panel.addEventListener("pointerdown", () => {
   window.addEventListener("mousemove", onMouseMove, { passive: false });
   window.addEventListener("touchmove", onMouseMove, { passive: false });
   window.addEventListener("pointerup", onMouseUp, { once: true });
+
+  onMouseMove(event);
 });
 
 function updateHueInputThumbColor() {
