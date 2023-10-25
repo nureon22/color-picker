@@ -5,19 +5,18 @@ import { RGB } from "color-convert/conversions";
 // # Predefined functions
 // ----------
 
-function updatePanelCanvas(canvas: HTMLCanvasElement, hue: number) {
+function updatePanelCanvas(context: CanvasRenderingContext2D, hue: number) {
   hue = clampNumber(0, hue, 360);
 
-  const context = canvas.getContext("2d");
+  const { width, height } = context.canvas;
 
-  if (context == null) {
-    return;
+  // If worker is available, generate canvas image data in separated worker.
+  if (worker) {
+    worker.postMessage({ hue, width, height });
+  } else {
+    const imageData = generateCanvasImageData(hue, width, height);
+    context.putImageData(imageData, 0, 0);
   }
-
-  const { width, height } = canvas;
-  const imageData = generateCanvasImageData(hue, width, height);
-
-  context.putImageData(imageData, 0, 0);
 }
 
 function generateCanvasImageData(hue: number, width: number, height: number) {
@@ -66,6 +65,20 @@ const $$ = (selector: string) => [...document.querySelectorAll(selector)];
 
 // ----------
 
+let worker: Worker | undefined;
+
+if (window.Worker) {
+  worker = new Worker(
+    new URL("./workers/canvas-image-data.ts", import.meta.url)
+  );
+
+  worker.addEventListener("message", ({ data }) => {
+    if (data instanceof ImageData) {
+      canvasContext?.putImageData(data, 0, 0);
+    }
+  });
+}
+
 const elements = {
   panelCanvas: $(".panel-canvas") as HTMLCanvasElement,
   panelHandle: $(".panel-handle") as HTMLElement,
@@ -79,6 +92,12 @@ const elements = {
   hslOutput: $(".output--hsl input.output-text") as HTMLInputElement,
   allOutputTexts: $$("input.output-text") as HTMLInputElement[],
   copyBtn: $(".copy-btn") as HTMLElement,
+};
+
+const canvasContext = elements.panelCanvas.getContext("2d");
+
+if (canvasContext == null) {
+  throw new Error("Your Browser doesn't support canvas 2d rendering");
 }
 
 let previousHue: number = clampNumber(0, +elements.hueInput.value, 360);
@@ -96,7 +115,7 @@ elements.hueInput.addEventListener("input", () => {
     const stop = onEveryAnimationFrame(() => {
       if (previousHue !== currentHue) {
         previousHue = currentHue;
-        updatePanelCanvas(elements.panelCanvas, currentHue);
+        updatePanelCanvas(canvasContext, currentHue);
         pickColor();
       }
     });
@@ -128,8 +147,14 @@ elements.panel.addEventListener("pointerdown", (event) => {
       event.preventDefault();
     }
 
-    elements.panelHandle.style.setProperty("left", handlePosition.x / rect.width * 100 + "%");
-    elements.panelHandle.style.setProperty("top", handlePosition.y / rect.height * 100 + "%");
+    elements.panelHandle.style.setProperty(
+      "left",
+      (handlePosition.x / rect.width) * 100 + "%"
+    );
+    elements.panelHandle.style.setProperty(
+      "top",
+      (handlePosition.y / rect.height) * 100 + "%"
+    );
 
     pickColor();
   };
@@ -208,6 +233,6 @@ elements.allOutputTexts.forEach((outputText) => {
   });
 });
 
-updatePanelCanvas(elements.panelCanvas, currentHue);
+updatePanelCanvas(canvasContext, currentHue);
 pickColor();
 updateHueInputThumbColor();
